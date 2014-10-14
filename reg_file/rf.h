@@ -7,20 +7,23 @@ SC_MODULE(rf){
 	sc_out <sc_uint<32> > rdDataA,rdDataB;
 
 	sc_uint<32> reg[32];
-	
+	sc_uint<5> rA,rB,w ;
 	
 	void readA(){
-		rdDataA = reg[rdAddrA];
+		rA = rdAddrA;
+		rdDataA = reg[rA];
 	}
 
 	void readB(){
-		rdDataB = reg[rdArrdB];
+		rB = rdAddrB;
+		rdDataB = reg[rB];
 	}
 
 	
-	void write(){
+	void writeF(){
 		if(write){
-			reg[wrAddr]=wrData;
+			w = wrAddr;
+			reg[w]=wrData;
 		}
 	}
 		
@@ -28,9 +31,9 @@ SC_MODULE(rf){
 		SC_METHOD(readA);
 			sensitive << rdAddrA;
 		SC_METHOD(readB);
-			sensitive  << rdAddrB;
-		SC_METHOD(write);
-			sensitive << wrAddr << wrData << clk.pos() << write;
+			sensitive << rdAddrB;
+		SC_METHOD(writeF);
+			sensitive << wrAddr << wrData << write << clk.pos() ;
 	}
 		
-}	
+};
