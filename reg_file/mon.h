@@ -4,7 +4,7 @@
 SC_MODULE(mon) {     
 	sc_in< sc_uint<5> > wrAddr,rdAddrA,rdAddrB;
 	sc_in< sc_uint<32> > rdDataA,rdDataB,wrData;
-	sc_in<bool> Clk,write;  
+	sc_in<bool> Clk,write;
 
 	void monitor()   {     
 		cout << std::setw(11) << "Time";

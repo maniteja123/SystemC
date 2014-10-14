@@ -1,14 +1,13 @@
 #include "systemc.h" 
 SC_MODULE(stim) {
-	sc_out<bool> X,Y,Z;
-	sc_in<bool> Clk;
+	sc_out<bool> opA,opB,result,zero;
+
 	void StimGen()   {
-		X.write(false);     
-		Y.write(false);
-		Z.write(true);
+		opA.write(111);     
+		opB.write(101);
 		wait();
 
-		X.write(false);     
+		opA.write(false);     
 		Y.write(true);     
 		Z.write(true);
 		wait();     
