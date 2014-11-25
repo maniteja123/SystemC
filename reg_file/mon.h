@@ -33,6 +33,6 @@ SC_MODULE(mon) {
 
 	SC_CTOR(mon)   {     
 		SC_THREAD(monitor);     
-		sensitive << Clk.pos();   
+			sensitive << Clk.pos();   
 	} 
 };

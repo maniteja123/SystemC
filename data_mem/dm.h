@@ -25,4 +25,4 @@ SC_MODULE(dm){
 		SC_METHOD(write);
 			sensitive << memWrite << wrAddr << wrData ;
 	}
-}
+};

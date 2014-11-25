@@ -17,5 +17,5 @@ SC_MODULE(im){
 			sensitive << rdAddr ;
 	}
 
-}
+};
 	

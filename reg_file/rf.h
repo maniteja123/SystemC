@@ -1,7 +1,7 @@
 #include <systemc.h>
 
 SC_MODULE(rf){
-	sc_in <bool>clk,write;
+	sc_in <bool> clk,write;
 	sc_in < sc_uint<5> > wrAddr,rdAddrA,rdAddrB;
 	sc_in < sc_uint<32> > wrData;
 	sc_out <sc_uint<32> > rdDataA,rdDataB;
