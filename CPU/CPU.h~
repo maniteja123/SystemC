@@ -1,9 +1,10 @@
 #include <systemc.h>
 
 SC_MODULE(rf){
-	sc_in <bool> clk,RegWrite,RegDst;
+	sc_in <bool> clk,RegWrite,RegDst,MemtoReg;
 	sc_in < sc_uint<5> > wrAddrR,rdAddrS,rdAddrT,rdAddrD;
-	sc_in < sc_uint<32> > wrDataR;
+	sc_in < sc_uint<32> > resultR,resultM;
+	sc_in < sc_uint<2> > alop;
 	sc_out <sc_uint<32> > rdDataA,rdDataB;
 
 	sc_uint<32> reg[32];
@@ -26,7 +27,11 @@ SC_MODULE(rf){
 	void write(){
 		if(RegWrite){
 			w = wrAddrR;
-			reg[w]=wrDataR;
+			if(alop.read() == 2){
+				reg[w] = resultR.read();
+			}else if (alop.read() == 0 && MemtoReg){
+				reg[w] = resultM.read();
+			}
 		}
 	}
 		
@@ -36,7 +41,7 @@ SC_MODULE(rf){
 		SC_METHOD(readB);
 			sensitive << rdAddrD << rdAddrT ;
 		SC_METHOD(write);
-			sensitive << wrAddrR << wrDataR << RegWrite << clk.pos() ;
+			sensitive << wrAddrR << RegWrite << clk.pos() ;
 	}
 		
 };
@@ -50,7 +55,7 @@ SC_MODULE(alu){
 	sc_in < bool > ALUSrc;
 	sc_out < bool > zero;
 	//sc_out < sc_uint<32> >result;
-	sc_out < sc_uint<32> > wrDataR,rdAddrM,wrAddrM;
+	sc_out < sc_uint<32> > rdAddrM,wrAddrM,resultR;  // ,wrDataR;
 
 	sc_uint<32> dataA, dataB, res;
 
@@ -58,7 +63,7 @@ SC_MODULE(alu){
 	void operate(){
 		zero = false;
 		dataA = rdDataA.read();
-		if(ALUSrc){
+		if(ALUSrc.read() == true){
 			dataB = addr.read();			
 			j = dataB[15];
 			for(i=16;i<32;i++)
@@ -101,7 +106,7 @@ SC_MODULE(alu){
 		switch(alop.read()){
 			case 0: // arithmetic
 		//		wrDataR.write(result);
-				wrDataR.write(res);
+				resultR.write(res);
 				break;
 	
 			case 35: // load
@@ -155,7 +160,7 @@ SC_MODULE(dm){
 
 	sc_in <bool> MemRead,MemWrite,MemtoReg;
 	sc_in < sc_uint<32> > wrDataM,rdAddrM,wrAddrM;
-	sc_out <sc_uint<32> > rdDataM,wrDataR;
+	sc_out <sc_uint<32> > rdDataM,resultM;		//,wrDataR;
 	sc_uint<32> reg[32];
 	sc_uint<5> r,w;
 
@@ -165,7 +170,9 @@ SC_MODULE(dm){
 			rdDataM = reg[r];
 		}
 		if(MemtoReg){
-			wrDataR.write(rdDataM.read());
+//			wrDataR.write(rdDataM.read());
+			r = rdAddrM;
+			resultM = reg[r];
 		}
 	}
 
@@ -189,19 +196,21 @@ SC_MODULE(cpu){
 	sc_out < sc_uint <2> > alop;
 	sc_out < sc_uint <4> > alc;
 	sc_out < bool > RegDst, RegWrite, ALUSrc, PCSrc, MemRead, MemWrite, MemtoReg ;
-	sc_out < sc_uint<i6> > addr;
-	sc_uint<5> rs,rt,rd,shamt;
-	sc_uint<6> func,op;
+	sc_out < sc_uint<16> > addr;
+	sc_out < sc_uint<5> > rs,rt,rd,shamt;
+	sc_out < sc_uint<6> > func,op;
 
 	void instr(){
-		op = inst.read()(31,26);
-		rs = inst.read()(25,21);
-		rt = inst.read()(20,16);
+		op.write(inst.read()(31,26));
+		rt.write(inst.read()(20,16));		
+		rs.write(inst.read()(25,21));
+		
+//		shamt.write(inst.read()(10,6);
 
-		if (op==0){   //  Arithmetic
+		if (op.read()==0){   //  Arithmetic
 			alop.write(2);  // OP = 10
-			func = inst.read()(3,0);
-			rt = inst.read()(15,11);
+			func.write(inst.read()(3,0));
+			rt.write(inst.read()(15,11));
 			RegDst.write(true);
 			RegWrite.write(false);
 			ALUSrc.write(false);
@@ -209,19 +218,19 @@ SC_MODULE(cpu){
 			MemRead.write(false);
 			MemWrite.write(false);
 			if (inst.read()(5,4)==2){  
-				if (func==0){  			// add - 0000 
+				if (func.read()==0){  			// add - 0000 
 					alc.write(2); 			// 0010
-				}else if (func==2){		// subtract - 0010
+				}else if (func.read()==2){		// subtract - 0010
 					alc.write(6); 			// 0110
-				}else if (func==4){  		// AND - 0100
+				}else if (func.read()==4){  		// AND - 0100
 					alc.write(0);			// 0000
-				}else if (func==5){		// OR - 0101
+				}else if (func.read()==5){		// OR - 0101
 					alc.write(1);			// 0001
-				}else if (func==10){		// set on less than - 1010
+				}else if (func.read()==10){		// set on less than - 1010
 					alc.write(7);			// 0111
 				}
 			}	
-		}else if (op=35){  // Load
+		}else if (op.read()==35){  // Load
 			addr = inst.read()(15,0);
 			alop.write(0);
 			alc.write(2);
@@ -231,7 +240,7 @@ SC_MODULE(cpu){
 			MemtoReg.write(true);
 			MemRead.write(true);
 			MemWrite.write(false);
-		}else if (op==43){  // store
+		}else if (op.read()==43){  // store
 			addr = inst.read()(15,0);
 			alop.write(0);
 			alc.write(2);
@@ -241,7 +250,7 @@ SC_MODULE(cpu){
 			MemtoReg.write(false);
 			MemRead.write(false);
 			MemWrite.write(false);
-		}else if (op==4){  // branch
+		}else if (op.read()==4){  // branch
 			alop.write(1);
 			alc.write(6);
 			RegDst.write(false);
@@ -250,9 +259,16 @@ SC_MODULE(cpu){
 			MemtoReg.write(false);
 			MemRead.write(false);
 			MemWrite.write(false);
-		}else if (op==2){ // jump
+		}else if (op.read()==2){ // jump
 								
 
+		}else{
+			RegDst.write(false);
+			RegWrite.write(false);
+			MemRead.write(false);
+			MemWrite.write(false);
+			MemtoReg.write(false);
+			ALUSrc.write(false);
 		}
 		
 	}
