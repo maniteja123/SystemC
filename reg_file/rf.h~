@@ -1,7 +1,7 @@
 #include <systemc.h>
 
 SC_MODULE(rf){
-	sc_in <bool>clk,write;
+	sc_in <bool> clk,write;
 	sc_in < sc_uint<5> > wrAddr,rdAddrA,rdAddrB;
 	sc_in < sc_uint<32> > wrData;
 	sc_out <sc_uint<32> > rdDataA,rdDataB;
@@ -26,6 +26,15 @@ SC_MODULE(rf){
 			reg[w]=wrData;
 		}
 	}
+
+	void print(){
+		int i;
+		cout << endl;
+		for(i=0;i<32;i++){
+			cout << reg[i];
+		}
+		cout << endl;
+	}
 		
 	SC_CTOR(rf){
 		SC_METHOD(readA);
@@ -34,6 +43,8 @@ SC_MODULE(rf){
 			sensitive << rdAddrB;
 		SC_METHOD(writeF);
 			sensitive << wrAddr << wrData << write << clk.pos() ;
+		SC_METHOD(print);
+			sensitive << clk.pos();
 	}
 		
 };

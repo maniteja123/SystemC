@@ -2,7 +2,7 @@
 
 SC_MODULE(rf){
 	sc_in <bool> clk,RegWrite,RegDst,MemtoReg;
-	sc_in < sc_uint<5> > wrAddrR,rdAddrS,rdAddrT,rdAddrD;
+	sc_in < sc_uint<5> > rdAddrS,rdAddrT,rdAddrD;
 	sc_in < sc_uint<32> > resultR,resultM;
 	sc_in < sc_uint<2> > alop;
 	sc_out <sc_uint<32> > rdDataA,rdDataB;
@@ -16,32 +16,44 @@ SC_MODULE(rf){
 	}
 
 	void readB(){
-		if(RegDst)
-			rB = rdAddrD;
-		else
-			rB = rdAddrT;
+		rB = rdAddrT;
 		rdDataB = reg[rB];
 	}
 
 	
 	void write(){
 		if(RegWrite){
-			w = wrAddrR;
 			if(alop.read() == 2){
+				w = rdAddrD;
 				reg[w] = resultR.read();
 			}else if (alop.read() == 0 && MemtoReg){
+				w = rdAddrT;
 				reg[w] = resultM.read();
 			}
 		}
 	}
+
+	void print(){
+		int i;
+		cout << "Regfile" << endl;
+		for(i=0;i<32;i++){
+			cout << reg[i] << ' ';
+		}
+		cout << endl;
+	}
 		
 	SC_CTOR(rf){
+		int i;
+		for(i=0;i<32;i++)
+			reg[i]=i;
 		SC_METHOD(readA);
 			sensitive << rdAddrS ;
 		SC_METHOD(readB);
-			sensitive << rdAddrD << rdAddrT ;
+			sensitive << rdAddrT ;
 		SC_METHOD(write);
-			sensitive << wrAddrR << RegWrite << clk.pos() ;
+			sensitive << RegWrite << clk.pos() ;
+		SC_METHOD(print);
+			sensitive << clk.pos();
 	}
 		
 };
@@ -52,7 +64,7 @@ SC_MODULE(alu){
 	sc_in < sc_uint<2> > alop;
 	sc_in < sc_uint<32> > rdDataA,rdDataB;
 	sc_in < sc_uint<16> > addr;
-	sc_in < bool > ALUSrc;
+	sc_in < bool > ALUSrc,clk;
 	sc_out < bool > zero;
 	//sc_out < sc_uint<32> >result;
 	sc_out < sc_uint<32> > rdAddrM,wrAddrM,resultR;  // ,wrDataR;
@@ -133,7 +145,7 @@ SC_MODULE(alu){
 	
 	SC_CTOR(alu){
 		SC_METHOD(operate);
-			sensitive << rdDataA << rdDataB << alc << alop ;
+			sensitive << rdDataA << rdDataB << alc << alop << clk.pos();
 	}
 
 };
@@ -158,36 +170,53 @@ SC_MODULE(im){
 
 SC_MODULE(dm){
 
-	sc_in <bool> MemRead,MemWrite,MemtoReg;
+	sc_in <bool> clk,MemRead,MemWrite,MemtoReg;
 	sc_in < sc_uint<32> > wrDataM,rdAddrM,wrAddrM;
-	sc_out <sc_uint<32> > rdDataM,resultM;		//,wrDataR;
-	sc_uint<32> reg[32];
+	sc_out <sc_uint<32> > rdDataM,resultM;
+	sc_uint<32> mem[32];
 	sc_uint<5> r,w;
 
 	void read(){
+//		cout << "read\n";
 		if(MemRead){
+			cout << "Memread\n";
 			r = rdAddrM;
-			rdDataM = reg[r];
+			rdDataM = mem[r];
 		}
 		if(MemtoReg){
-//			wrDataR.write(rdDataM.read());
+			cout << "Memtoreg\n";
 			r = rdAddrM;
-			resultM = reg[r];
+			resultM = mem[r];
 		}
 	}
 
 	void write(){
+//		cout << "write\n";
 		if(MemWrite){
+			cout << "Memwrite \n";
 			w = wrAddrM;
-			reg[w] = wrDataM;
+			mem[w] = wrDataM;
 		}
 	}
 
+	void print(){
+		int i;
+		cout << "Data Memory " <<  endl;
+		for(i=0;i<32;i++)
+			cout << mem[i] << ' ';
+		cout << endl;	
+	}
+
 	SC_CTOR(dm){
+		int i;
+		for(i=0;i<32;i++)
+			mem[i]=i;
 		SC_METHOD(read);
 			sensitive << MemRead << rdAddrM ;
 		SC_METHOD(write);
-			sensitive << MemWrite << wrAddrM << wrDataM ;
+			sensitive << MemWrite << wrAddrM ;
+		SC_METHOD(print);
+			sensitive << clk.pos();
 	}
 };
 
@@ -249,7 +278,7 @@ SC_MODULE(cpu){
 			ALUSrc.write(true);
 			MemtoReg.write(false);
 			MemRead.write(false);
-			MemWrite.write(false);
+			MemWrite.write(true);
 		}else if (op.read()==4){  // branch
 			alop.write(1);
 			alc.write(6);
@@ -260,7 +289,7 @@ SC_MODULE(cpu){
 			MemRead.write(false);
 			MemWrite.write(false);
 		}else if (op.read()==2){ // jump
-								
+			// to be done later once PC is working								
 
 		}else{
 			RegDst.write(false);

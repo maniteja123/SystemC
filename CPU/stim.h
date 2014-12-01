@@ -7,9 +7,9 @@ SC_MODULE(stim){
 
 	void StimGen(){
 		
-		wait(10,SC_NS);
+//		wait(10,SC_NS);
 
-		inst.write(0b00000000001000100000000000010010);
+//		inst.write(0b00000000001000100000000000010010);
 
 		wait(10,SC_NS);
 
@@ -17,8 +17,12 @@ SC_MODULE(stim){
 
 		wait(10,SC_NS);
 
-		inst.write(0b10101100001000100000000000010000);
+		inst.write(0b10101100001000100000000000000001);
 		
+		wait(10,SC_NS);
+
+		inst.write(0b10001100001001000000000000000001);
+
 		wait(10,SC_NS);
 
 		inst.write(0b10001100001001000000000000010010);

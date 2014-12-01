@@ -7,7 +7,7 @@ int sc_main(int argc, char* argv[]){
 
 	sc_signal < sc_uint<32> > inst;
 	sc_signal < sc_uint<6> > func,op;
-	sc_signal < sc_uint<5> > rs,rt,rd,shamt,wrAddrR;
+	sc_signal < sc_uint<5> > rs,rt,rd,shamt;
 	sc_signal < sc_uint<2> > alop;
 	sc_signal < sc_uint<4> > alc;
 	sc_signal < bool > RegDst, RegWrite, ALUSrc, PCSrc, MemRead, MemWrite, MemtoReg,zero;
@@ -22,7 +22,6 @@ int sc_main(int argc, char* argv[]){
 	R.RegDst(RegDst);
 	R.MemtoReg(MemtoReg);
 	R.alop(alop);
-	R.wrAddrR(wrAddrR);
 //	R.wrDataR(wrDataR);
 	R.resultR(resultR);
 	R.resultM(resultM);
@@ -37,6 +36,7 @@ int sc_main(int argc, char* argv[]){
 	//sc_out < sc_uint<32> > rdData;
 
 	dm D("D");
+	D.clk(TestClk);
 	D.MemRead(MemRead);
 	D.MemWrite(MemWrite);
 	D.MemtoReg(MemtoReg);
@@ -88,7 +88,7 @@ int sc_main(int argc, char* argv[]){
 	M.rt(rt);
 	M.rd(rd);
 	M.shamt(shamt);
-	M.wrAddrR(wrAddrR);
+//	M.wrAddrR(wrAddrR);
 	M.alop(alop);
 	M.alc(alc);
 	M.RegDst(RegDst);

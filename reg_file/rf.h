@@ -26,6 +26,15 @@ SC_MODULE(rf){
 			reg[w]=wrData;
 		}
 	}
+
+	void print(){
+		int i;
+		cout << endl;
+		for(i=0;i<32;i++){
+			cout << reg[i] << ' ';
+		}
+		cout << endl;
+	}
 		
 	SC_CTOR(rf){
 		SC_METHOD(readA);
@@ -34,6 +43,8 @@ SC_MODULE(rf){
 			sensitive << rdAddrB;
 		SC_METHOD(writeF);
 			sensitive << wrAddr << wrData << write << clk.pos() ;
+		SC_METHOD(print);
+			sensitive << clk.pos();
 	}
 		
 };
