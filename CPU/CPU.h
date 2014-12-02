@@ -25,7 +25,6 @@ SC_MODULE(rf){
 		if(RegWrite){
 			if(alop.read() == 2){
 				w = rdAddrD;
-				cout << rdAddrD << ' ' << resultR <<endl;
 				reg[w] = resultR.read();
 			}else if (alop.read() == 0 && MemtoReg){
 				w = rdAddrT;
@@ -52,7 +51,7 @@ SC_MODULE(rf){
 		SC_METHOD(readB);
 			sensitive << rdAddrT ;
 		SC_METHOD(write);
-			sensitive << RegWrite << clk.pos() ;
+			sensitive << clk.pos() ;
 		SC_METHOD(print);
 			sensitive << clk.pos();
 	}
@@ -119,17 +118,14 @@ SC_MODULE(alu){
 			zero = true;
 		switch(op.read()){
 			case 0: // arithmetic
-		//		wrDataR.write(result);
 				resultR.write(res);
 				break;
 	
 			case 35: // load
-		//		rdAddrM.write(result);
 				rdAddrM.write(res);
 				break;
 		
 			case 43:// store
-		//		wrAddrM.write(result);
 				wrAddrM.write(res);
 				break;
 
@@ -195,7 +191,7 @@ SC_MODULE(dm){
 	void write(){
 //		cout << "write\n";
 		if(MemWrite){
-//			cout << "Memwrite \n";
+//			cout << wrAddrM << " Memwrite \n";
 			w = wrAddrM;
 			mem[w] = wrDataM;
 		}
@@ -214,9 +210,9 @@ SC_MODULE(dm){
 		for(i=0;i<32;i++)
 			mem[i]=i;
 		SC_METHOD(read);
-			sensitive << MemRead << rdAddrM ;
+			sensitive << rdAddrM ;
 		SC_METHOD(write);
-			sensitive << MemWrite << wrAddrM ;
+			sensitive << clk.pos();
 		SC_METHOD(print);
 			sensitive << clk.pos();
 	}

@@ -19,6 +19,7 @@ SC_MODULE(mon) {
 		cout << std::setw(5) << "rs"; 
 		cout << std::setw(5) << "rt";
 		cout << std::setw(5) << "rd";
+		cout << std::setw(5) << "addr";
 		cout << std::setw(5) << "alc";
 		cout << std::setw(5) << "alop";
 		cout << std::setw(5) << "ALUSrc";
@@ -45,6 +46,7 @@ SC_MODULE(mon) {
 			cout << std::setw(5) << rs;
 			cout << std::setw(5) << rt;
 			cout << std::setw(5) << rd ;
+			cout << std::setw(5) << addr;
 			cout << std::setw(5) << alc ;
 			cout << std::setw(5) << alop ;
 			cout << std::setw(5) << ALUSrc ;
@@ -58,7 +60,7 @@ SC_MODULE(mon) {
 			cout << std::setw(10) << rdDataA ;
 			cout << std::setw(10) << rdDataB;
 			cout << std::setw(10) << resultR ;
-			cout << endl;
+			cout << endl << endl;
 		}
 	}
 

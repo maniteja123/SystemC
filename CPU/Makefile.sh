@@ -37,7 +37,7 @@ fi
 
 for i in `cat $templist`
 do
-	if ./$i.o
+	if ./$i.o >> a.txt
 	then
 		 echo "[$(date)]::$i.o executed successfully\n"
 	else
