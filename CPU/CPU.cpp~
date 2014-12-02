@@ -12,7 +12,7 @@ int sc_main(int argc, char* argv[]){
 	sc_signal < sc_uint<4> > alc;
 	sc_signal < bool > RegDst, RegWrite, ALUSrc, PCSrc, MemRead, MemWrite, MemtoReg,zero;
 	sc_signal < sc_uint<16> > addr;
-	sc_signal < sc_uint<32> > resultR,resultM,rdDataA,rdDataB,wrDataM,rdAddrM,rdDataM,wrAddrM;   // ,wrDataR,rdAddrI,rdDataI;
+	sc_signal < sc_uint<32> > resultR,resultM,rdDataA,rdDataB,rdAddrM,rdDataM,wrAddrM;   // ,wrDataR,rdAddrI,rdDataI;
 
 	sc_clock TestClk("TestClock", 10, SC_NS,1,SC_NS);
 
@@ -40,7 +40,7 @@ int sc_main(int argc, char* argv[]){
 	D.MemRead(MemRead);
 	D.MemWrite(MemWrite);
 	D.MemtoReg(MemtoReg);
-	D.wrDataM(wrDataM);
+	D.wrDataM(rdDataB);
 	D.rdAddrM(rdAddrM);
 	D.wrAddrM(wrAddrM);
 	D.rdDataM(rdDataM);
@@ -60,6 +60,7 @@ int sc_main(int argc, char* argv[]){
 	A.resultR(resultR);
 	A.rdAddrM(rdAddrM);
 	A.wrAddrM(wrAddrM);
+	A.clk(TestClk);
 
 	cpu C("C");
 	C.inst(inst);
@@ -105,7 +106,7 @@ int sc_main(int argc, char* argv[]){
 	M.resultM(resultM);
 	M.rdDataA(rdDataA);
 	M.rdDataB(rdDataB);
-	M.wrDataM(wrDataM);
+	M.wrDataM(rdDataB);
 	M.rdAddrM(rdAddrM);
 	M.rdDataM(rdDataM);
 	M.wrAddrM(wrAddrM);  
